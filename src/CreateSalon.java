@@ -1,38 +1,68 @@
-import java.io.File;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
 public class CreateSalon {
 	private String nom;
 	private String mdp;
-	
+	private Vector clients = new Vector();
+	private int nbClients=0;
+
 	public CreateSalon(String nom){
 		this.nom=nom;
 	}
-	
+
 	public CreateSalon(String nom, String mdp){
 		this.mdp=mdp;
 		this.nom=nom;
 	}
-	
 
-	public boolean initialisation() {
-		File dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom);
-		return dir.mkdirs();
-	
-	
-		MulticastSocket ms=new MulticastSocket(8042);
-		InetAddress group= InetAddress.getLocalHost();
-		DatagramPacket dataSent = new DatagramPacket("bonjou".getBytes(), "bonjour".length(), group, 8042);
-		ms.send(dataSent);
-		
-		while(true){
-			byte[] buf = new byte[1000];
-			DatagramPacket r = new DatagramPacket(buf, buf.length);
-			ms.receive(r);
-			System.out.println(new String(r.getData()));
+
+	public void initialisation() throws IOException {
+		//File dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom);
+		File dir = new File ("/home/thibault/.palantir/"+nom);
+		dir.mkdirs();
+		InetSocketAddress serverAddr = new InetSocketAddress("localhost", 1111);
+		ServerSocket ss = new ServerSocket(1111);
+
+		while (true){
+			try {
+				new ClientThread(ss.accept(),this, mdp);
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+	synchronized public void sendAll(String message){
+		System.out.println(message);
+		PrintWriter out;
+		for (int i=0; i < clients.size(); i++){
+			out = (PrintWriter) clients.elementAt(i);
+			if (out != null){
+				out.print(message);
+				out.flush();
+			}
 		}
 	}
-	
+
+	synchronized public void delClient(int i){
+		nbClients--;
+		if(clients.elementAt(i) != null)
+			clients.removeElementAt(i);
+	}
+
+	synchronized public int addClient(PrintWriter out){
+		nbClients++;
+		clients.addElement(out);
+		sendAll("Un nouveau client est dans la conversation");
+		return clients.size()-1;
+	}
+
+	synchronized public int getNbClients(){
+		return nbClients;
+	}
+
 }
+
