@@ -19,7 +19,7 @@ public class ClientThread implements Runnable{
 			in = new BufferedReader(new InputStreamReader(sc.getInputStream()));
 			if(mdp!=null){
 				char buffer[] = new char[1];
-				String message="";
+				String message="tt";
 				while(in.read(buffer, 0, 1)!=-1){
 					if (buffer[0] != '\n' && buffer[0] != '\r')
 						message += buffer[0];
@@ -48,7 +48,7 @@ public class ClientThread implements Runnable{
 				if (buffer[0] != '\n' && buffer[0] != '\r'){
 					message += buffer[0];
 				}else {
-					salon.sendAll(message);
+					salon.sendAll(message, numClient);
 					message = "";
 				}
 			}
@@ -56,7 +56,7 @@ public class ClientThread implements Runnable{
 		catch (Exception e){ }
 		finally{
 			try{
-				salon.sendAll("Le client "+numClient+" s'est déconnecter");
+				salon.sendAll("Le client "+numClient+" s'est déconnecté", numClient);
 				salon.delClient(numClient);
 				sc.close();
 			}

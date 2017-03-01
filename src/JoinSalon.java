@@ -1,10 +1,5 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.io.*;
+import java.net.*;
 import java.util.Scanner;
 
 public class JoinSalon {
@@ -24,26 +19,29 @@ public class JoinSalon {
 	public void connect() throws UnknownHostException, IOException{
 		Socket sc = new Socket (serv, 1111);
 		BufferedReader in = new BufferedReader(new InputStreamReader(sc.getInputStream()));
-		OutputStream out=sc.getOutputStream();
-		if(mdp!=null)
-			out.write(mdp.getBytes());
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(sc.getOutputStream()),true);
+		//if(mdp!=null)
+			//out.write(mdp.getBytes());
 		Scanner scan= new Scanner(System.in);
 		String message="";
-		char buffer[] = new char[1]; 
 		while(!(message=scan.nextLine()).equals("/quit")){
-			out.write(message.getBytes());
+			out.println(message);
 			message="";
-			while(in.read(buffer, 0, 1)!=-1){
-				if (buffer[0] != '\n' && buffer[0] != '\r')
-					message += buffer[0];
-				else {
-					System.out.println(message);
+			
+			char buffer[] = new char[250]; 
+			int t=in.read(buffer, 0, 250);
+			if(t!=-1){
+				for(int i=0; i<t; i++){
+					message+=buffer[i];
 				}
 			}
+			System.out.println(message);
+
 			message="";
 		}
 		
 		sc.close();
+		System.exit(0);
 	}
 
 

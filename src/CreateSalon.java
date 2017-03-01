@@ -19,8 +19,7 @@ public class CreateSalon {
 
 
 	public void initialisation() throws IOException {
-		//File dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom);
-		File dir = new File ("/home/thibault/.palantir/"+nom);
+		File dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom);
 		dir.mkdirs();
 		InetSocketAddress serverAddr = new InetSocketAddress("localhost", 1111);
 		ServerSocket ss = new ServerSocket(1111);
@@ -35,13 +34,14 @@ public class CreateSalon {
 
 	}
 
-	synchronized public void sendAll(String message){
+	synchronized public void sendAll(String message, int num){
 		System.out.println(message);
 		PrintWriter out;
 		for (int i=0; i < clients.size(); i++){
 			out = (PrintWriter) clients.elementAt(i);
-			if (out != null){
+			if (out != null && i != num){
 				out.print(message);
+				message="";
 				out.flush();
 			}
 		}
@@ -56,7 +56,7 @@ public class CreateSalon {
 	synchronized public int addClient(PrintWriter out){
 		nbClients++;
 		clients.addElement(out);
-		sendAll("Un nouveau client est dans la conversation");
+		sendAll("Un nouveau client est dans la conversation", -1);
 		return clients.size()-1;
 	}
 
