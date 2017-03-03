@@ -17,16 +17,15 @@ public class JoinSalon extends Thread{
 	}
 	
 	public void connect() throws UnknownHostException, IOException{
-		Socket sc = new Socket (serv, 8080);
+		Socket sc = new Socket (serv, 1111);
 		BufferedReader in = new BufferedReader(new InputStreamReader(sc.getInputStream()));
-		PrintWriter out = new PrintWriter(new OutputStreamWriter(sc.getOutputStream()),true);
-		if(mdp!=null)
-			out.println(mdp);
+		OutputStream out=sc.getOutputStream();
+		//if(mdp!=null)
+		//	out.println(mdp);
 		Scanner scan= new Scanner(System.in);
 		String message="";
-		this.start();
 		while(!(message=scan.nextLine()).equals("/quit")){
-			out.println(message);
+			out.write(message.getBytes());
 			message="";
 			
 			char buffer[] = new char[250]; 
@@ -43,32 +42,6 @@ public class JoinSalon extends Thread{
 		sc.close();
 		System.exit(0);
 	}
-
-	/*public void run (){
-		try{
-			Socket sc = new Socket (serv, 1111);
-		
-		BufferedReader in = new BufferedReader(new InputStreamReader(sc.getInputStream()));
-
-		
-
-		String message="";
-		while(true){
-			char buffer[] = new char[250]; 
-			int t=in.read(buffer, 0, 250);
-			if(t!=-1){
-				for(int i=0; i<t; i++){
-					message+=buffer[i];
-				}
-			}
-			message="";
-		}
-		}catch(Exception e){
-			System.out.println("erreur run "+e);
-		}
-
-
-	}*/
 
 
 }
