@@ -28,7 +28,7 @@ public class ClientThread implements Runnable{
 						System.out.println(message);
 						if(!message.equals(mdp)){
 							sc.close();
-							System.out.println("fermeture co");
+							System.out.println("Erreur mot de passe");
 						}
 
 					}
