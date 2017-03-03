@@ -17,19 +17,24 @@ public class ClientThread implements Runnable{
 		try{
 			out = new PrintWriter(sc.getOutputStream());
 			in = new BufferedReader(new InputStreamReader(sc.getInputStream()));
+			
 			if(mdp!=null){
 				char buffer[] = new char[1];
-				String message="tt";
+				String message="";
 				while(in.read(buffer, 0, 1)!=-1){
 					if (buffer[0] != '\n' && buffer[0] != '\r')
 						message += buffer[0];
 					else {
 						System.out.println(message);
-						if(!message.equals(mdp))
+						if(!message.equals(mdp)){
 							sc.close();
+							System.out.println("fermeture co");
+						}
+
 					}
 				}
 			}
+			
 			numClient = this.salon.addClient(out);
 			thread = new Thread(this);
 			thread.start();
