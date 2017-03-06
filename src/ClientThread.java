@@ -10,13 +10,18 @@ public class ClientThread implements Runnable{
 	private InputStream in;
 	private CreateSalon salon;
 	private int numClient=0;
+	private int numEnvoyeur=0;
+	private boolean receveur;
 
-	public ClientThread (Socket s, CreateSalon salon, String mdp){
+	public ClientThread (Socket s, CreateSalon salon, String mdp, boolean b){
+		receveur=b;
 		this.salon=salon;
 		sc=s;
 		try{
-			out = new PrintWriter(sc.getOutputStream());
-			in = sc.getInputStream();
+	//		if(receveur)
+				out = new PrintWriter(sc.getOutputStream());
+	//		else
+				in = sc.getInputStream();
 		/*	if(mdp!=null){
 				char buffer[] = new char[1];
 				String message="";
@@ -33,8 +38,9 @@ public class ClientThread implements Runnable{
 					}
 				}
 			}*/
-			
 			numClient = this.salon.addClient(out);
+	//		else
+				numEnvoyeur=this.salon.getNbClients()-1;
 			thread = new Thread(this);
 			thread.start();
 
@@ -47,18 +53,23 @@ public class ClientThread implements Runnable{
 	public void run(){
 		String message = "";
 		try{
-			byte buf[]=new byte[250];
-			while(in.read(buf, 0, 250)!=-1){
-				System.out.println(new String(buf));
-			}
+	//		if(!receveur){
+			while(sc!=null){
+				byte buf[]=new byte[250];
+				while(in.read(buf, 0, 250)!=-1){
+					salon.sendAll(new String(buf), numClient);
+				}
+			}//}
 		}catch (Exception e){
 		}
 		finally{
 			try{
-				salon.sendAll("Le client "+numClient+" s'est déconnecté", numClient);
-				salon.delClient(numClient);
-				sc.close();
-			}
+		//		if(!receveur){
+					salon.sendAll("Le client "+numClient+" s'est déconnecté", numClient);
+					salon.delClient(numClient);
+					sc.close();
+				}
+	//		}
 			catch (IOException e){ }
 		}
 	}
