@@ -56,11 +56,13 @@ public class JoinSalon extends Thread{
 				out.write(message.getBytes());
 				message="";
 			}
+			out.write(message.getBytes());
+			
+				sc.close();
 		}catch(Exception e){
 			System.out.println(e);
 		}finally{
 			try{
-				sc.close();
 				System.exit(0);
 			}catch(Exception e){
 				System.out.println(e);

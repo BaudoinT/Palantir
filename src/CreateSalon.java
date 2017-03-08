@@ -7,6 +7,8 @@ public class CreateSalon {
 	private String mdp;
 	private Vector clients = new Vector();
 	private int nbClients=0;
+	private FileWriter fw;
+	private File dir;
 
 	public CreateSalon(String nom){
 		this.nom=nom;
@@ -19,12 +21,13 @@ public class CreateSalon {
 
 
 	public void initialisation() throws IOException {
-		File dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom);
+		dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom+"/history");
 		dir.mkdirs();
+		fw = new FileWriter (dir);
 		InetSocketAddress serverAddr = new InetSocketAddress("localhost", 1111);
 		ServerSocket ss = new ServerSocket(1111);
-		InetSocketAddress serverAddr2 = new InetSocketAddress("localhost", 1112);
-		ServerSocket ss2 = new ServerSocket(1112);
+	/*	InetSocketAddress serverAddr2 = new InetSocketAddress("localhost", 1112);
+		ServerSocket ss2 = new ServerSocket(1112);*/
 
 		while (true){
 			try {
@@ -37,15 +40,17 @@ public class CreateSalon {
 	}
 
 	synchronized public void sendAll(String message, int num){
-		System.out.println(message);	
+		try{
+			fw.write(message);
+		}catch(Exception e){
+			System.out.println(e);
+		}
+		System.out.println(message);
 		PrintWriter out;
 		for (int i=0; i < clients.size(); i++){
 			out = (PrintWriter) clients.elementAt(i);
 			if (out != null && i != num){
-				System.out.println("envoi à: "+i);
-				System.out.println("de: "+num);
 				out.print(message);
-				message="";
 				out.flush();
 			}
 		}
@@ -55,10 +60,10 @@ public class CreateSalon {
 		nbClients--;
 		if(clients.elementAt(i) != null)
 			clients.removeElementAt(i);
+		System.out.println(clients.size());
 	}
 
 	synchronized public int addClient(PrintWriter out){
-		System.out.println(clients.size());
 		nbClients++;
 		clients.addElement(out);
 		sendAll("Un nouveau client est dans la conversation", clients.size()-1);
