@@ -6,7 +6,7 @@ public class ClientThread implements Runnable{
 
 	private Thread thread; 
 	private Socket sc;
-	private PrintWriter out;
+	private OutputStream out;
 	private InputStream in;
 	private CreateSalon salon;
 	private int numClient=0;
@@ -17,8 +17,9 @@ public class ClientThread implements Runnable{
 		this.salon=salon;
 		sc=s;
 		try{
-			out = new PrintWriter(sc.getOutputStream());
+			out=sc.getOutputStream();
 			in = sc.getInputStream();
+			                                                                                                
 		/*	if(mdp!=null){
 				char buffer[] = new char[1];
 				String message="";
@@ -54,7 +55,6 @@ public class ClientThread implements Runnable{
 				if((t=in.read(buf, 0, 250))!=-1){
 					message=new String(buf).substring(0,t);
 					if(!message.substring(0,t).equals("/quit"))
-
 						salon.sendAll("<"+numClient+"> "+message, numClient);
 				}
 			}while(!message.substring(t).equals("/quit"));

@@ -7,7 +7,7 @@ public class JoinSalon extends Thread{
 	OutputStream out;
 	Socket sc=null;
 	private String serv, salon, mdp;
-	private ChiffrementAes chiff;
+	ChiffrementAes chiff;
 	private String cle;
 
 	public JoinSalon(String serv, String salon, String mdp) throws UnknownHostException, IOException{
@@ -27,30 +27,22 @@ public class JoinSalon extends Thread{
 	
 	public void connect() throws UnknownHostException, IOException{
 		sc = new Socket (serv, 1111);
-		BufferedReader in = new BufferedReader(new InputStreamReader(sc.getInputStream()));
+		InputStream in = sc.getInputStream();
 		out=sc.getOutputStream();
 
 		//if(mdp!=null)
 		//	out.println(mdp);
 		String message="";
 		this.start();
-		//while(!(message=scan.nextLine()).equals("/quit")){
 		while(true){
-			char buffer[] = new char[250];
-			int t=in.read(buffer, 0, 250);
-			if(t!=-1){
-				for(int i=0; i<t; i++){
-					message+=buffer[i];
-				}
-
-				System.out.println(message);
-			}
 			message="";
+			byte buf[]=new byte[250];
+				if((in.read(buf, 0, 250))!=-1){
+					message=new String(buf);
+					System.out.println(message);
+
+				}
 		}
-		
-		
-		//sc.close();
-		//System.exit(0);
 	}
 
 	public void run(){
@@ -63,8 +55,7 @@ public class JoinSalon extends Thread{
 				message="";
 			}
 			out.write(message.getBytes());
-			
-				sc.close();
+			sc.close();
 		}catch(Exception e){
 			System.out.println(e);
 		}finally{

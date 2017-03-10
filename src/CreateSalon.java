@@ -10,8 +10,6 @@ public class CreateSalon {
 	private FileWriter fw;
 	private File dir;
 
-	private PublicKey pub;
-
 	public CreateSalon(String nom){
 		this.nom=nom;
 	}
@@ -21,6 +19,9 @@ public class CreateSalon {
 		this.nom=nom;
 	}
 
+	public String getNom(){
+		return nom;
+	}
 
 	public void initialisation() throws IOException {
 		dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom);
@@ -30,10 +31,12 @@ public class CreateSalon {
 		ServerSocket ss = new ServerSocket(1111);
 
 
-		GenerateurCleRsa gene = new GenerateurClesRsa();
+		GenerateurCleRsa gene = new GenerateurCleRsa();
+		GestionClesRsa ges = new GestionClesRsa();
 		gene.generator();
 
-		
+		ges.sauvegardeClePublic(gene.getPublicKey(),"/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom+"/cle_pub");
+		ges.sauvegardeClePrivee(gene.getPrivateKey(),"/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom+"/cle_priv");
 
 		while (true){
 			try {
@@ -52,12 +55,16 @@ public class CreateSalon {
 			System.out.println(e);
 		}*/
 		System.out.println(message);
-		PrintWriter out;
+		OutputStream out;
 		for (int i=0; i < clients.size(); i++){
-			out = (PrintWriter) clients.elementAt(i);
+			out = (OutputStream) clients.elementAt(i);
 			if (out != null && i != num){
-				out.print(message);
-				out.flush();
+				try{
+					out.write(message.getBytes());
+					out.flush();
+				}catch(Exception e){
+					System.out.println("test: "+e);
+				}
 			}
 		}
 	}
@@ -69,7 +76,7 @@ public class CreateSalon {
 		System.out.println(clients.size());
 	}
 
-	synchronized public int addClient(PrintWriter out){
+	synchronized public int addClient(OutputStream out){
 		nbClients++;
 		clients.addElement(out);
 		sendAll("Un nouveau client est dans la conversation", clients.size()-1);

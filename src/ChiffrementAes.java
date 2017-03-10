@@ -1,5 +1,3 @@
-package projet_secu;
-
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
