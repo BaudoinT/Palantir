@@ -9,6 +9,7 @@ public class CreateSalon {
 	private int nbClients=0;
 	private FileWriter fw;
 	private File dir;
+	private ArrayList<String> listePseudo=new ArrayList<>();
 
 	public CreateSalon(String nom){
 		this.nom=nom;
@@ -17,10 +18,6 @@ public class CreateSalon {
 	public CreateSalon(String nom, String mdp){
 		this.mdp=mdp;
 		this.nom=nom;
-	}
-
-	public String getNom(){
-		return nom;
 	}
 
 	public void initialisation() throws IOException {
@@ -48,12 +45,14 @@ public class CreateSalon {
 
 	}
 
-	synchronized public void sendAll(String message, int num){
+	synchronized public void sendAll(String message, int num, boolean b){
 	/*	try{
 			fw.write(message);
 		}catch(Exception e){
 			System.out.println(e);
 		}*/
+		if(b)
+			message=("<"+listePseudo.get(num)+"> "+message);
 		System.out.println(message);
 		OutputStream out;
 		for (int i=0; i < clients.size(); i++){
@@ -63,7 +62,7 @@ public class CreateSalon {
 					out.write(message.getBytes());
 					out.flush();
 				}catch(Exception e){
-					System.out.println("test: "+e);
+					System.out.println(e);
 				}
 			}
 		}
@@ -71,20 +70,33 @@ public class CreateSalon {
 
 	synchronized public void delClient(int i){
 		nbClients--;
-		if(clients.elementAt(i) != null)
+		if(clients.elementAt(i) != null){
 			clients.removeElementAt(i);
-		System.out.println(clients.size());
+			listePseudo.remove(i);
+		}
 	}
 
 	synchronized public int addClient(OutputStream out){
 		nbClients++;
 		clients.addElement(out);
-		sendAll("Un nouveau client est dans la conversation", clients.size()-1);
+		sendAll("Un nouveau client est dans la conversation", nbClients-1, false);
 		return clients.size()-1;
 	}
 
 	synchronized public int getNbClients(){
 		return nbClients;
+	}
+
+	public String getNom(){
+		return nom;
+	}
+
+	public void setPseudo(String pseudo){
+		listePseudo.add(pseudo);
+	}
+
+	public String getPseudo(int n){
+		return listePseudo.get(n);
 	}
 
 }

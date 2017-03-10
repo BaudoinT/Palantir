@@ -9,20 +9,21 @@ public class JoinSalon extends Thread{
 	private String serv, salon, mdp;
 	ChiffrementAes chiff;
 	private String cle;
+	private String pseudo;
 
-	public JoinSalon(String serv, String salon, String mdp) throws UnknownHostException, IOException{
+	public JoinSalon(String serv, String salon, String mdp, String pseudo) throws UnknownHostException, IOException{
 		this.serv=serv;
 		this.salon=salon;
 		this.mdp=mdp;
-
+		this.pseudo=pseudo;
 		chiff = new ChiffrementAes();
 		chiff.generationcle();
 		cle = chiff.getCle();
 
 	}
 
-	public JoinSalon(String serv, String salon) throws UnknownHostException, IOException {
-		this(serv,salon,null);	
+	public JoinSalon(String serv, String salon, String pseudo) throws UnknownHostException, IOException {
+		this(serv,salon,null, pseudo);	
 	}
 	
 	public void connect() throws UnknownHostException, IOException{
@@ -32,11 +33,11 @@ public class JoinSalon extends Thread{
 		String message="";
 
 		//RECEPTION CLE PUBLIC
-		byte buff[]=new byte[250];
+	/*	byte buff[]=new byte[250];
 		if((in.read(buff, 0, 250))!=-1){
 			message=new String(buff);
 			System.out.println(message);
-		}
+		}*/
 
 		//if(mdp!=null)
 		//	out.println(mdp);
@@ -57,7 +58,8 @@ public class JoinSalon extends Thread{
 
 	public void run(){
 		try{
-		
+			//ENVOI PSEUDO
+			out.write(pseudo.getBytes());
 			Scanner scan= new Scanner(System.in);
 			String message="";
 			while(!(message=scan.nextLine()).equals("/quit")){

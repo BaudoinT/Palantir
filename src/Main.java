@@ -27,9 +27,9 @@ public class Main {
 			
 			try {
 			if(args.length>3 && args[3].equals("-p"))
-				join= new JoinSalon(args[1],args[2], args[4]);
+				join= new JoinSalon(args[1],args[2], args[4], args[5]);
 			else
-				join= new JoinSalon(args[1], args[2]);
+				join= new JoinSalon(args[1], args[2], args[3]);
 			
 				join.connect();
 			} catch (Exception e) {

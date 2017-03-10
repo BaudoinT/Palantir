@@ -21,7 +21,7 @@ public class ClientThread implements Runnable{
 			in = sc.getInputStream();
 
 			//ENVOI CLE PUBLIC
-			File source = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon.getNom()+"/cle_pub");
+			/*File source = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon.getNom()+"/cle_pub");
 			InputStream sourceFile = new FileInputStream(source);  
 			                                                                                                
 			try {
@@ -32,7 +32,7 @@ public class ClientThread implements Runnable{
 				} 
 			} catch (IOException e){ 
 				e.printStackTrace(); 
-			}
+			}*/
 		                                                                                              
 		/*	if(mdp!=null){
 				char buffer[] = new char[1];
@@ -61,20 +61,23 @@ public class ClientThread implements Runnable{
 		String message = "";
 		int t=0;
 		try{
+			byte buf[]=new byte[250];
+			if((t=in.read(buf, 0, 250))!=-1)
+				salon.setPseudo(new String(buf));
+
 			do{
-				byte buf[]=new byte[250];
 				if((t=in.read(buf, 0, 250))!=-1){
 					message=new String(buf).substring(0,t);
 					if(!message.substring(0,t).equals("/quit"))
 
-						salon.sendAll("<"+numClient+"> "+message, numClient);
+						salon.sendAll(message, numClient, true);
 				}
 			}while(!message.substring(t).equals("/quit"));
 		}catch (Exception e){
 		}
 		finally{
 			try{
-				salon.sendAll("Le client "+numClient+" s'est déconnecté", numClient);
+				salon.sendAll("Le client "+salon.getPseudo(numClient)+" s'est déconnecté", numClient, false);
 				salon.delClient(numClient);
 				sc.close();
 			}
