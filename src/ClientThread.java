@@ -19,7 +19,21 @@ public class ClientThread implements Runnable{
 		try{
 			out=sc.getOutputStream();
 			in = sc.getInputStream();
+
+			//ENVOI CLE PUBLIC
+			File source = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon.getNom()+"/cle_pub");
+			InputStream sourceFile = new FileInputStream(source);  
 			                                                                                                
+			try {
+				byte buffer[] = new byte[(int)source.length()+1]; 
+				int nbLecture;
+				while ((nbLecture = sourceFile.read(buffer)) != -1){ 
+					out.write(buffer); 
+				} 
+			} catch (IOException e){ 
+				e.printStackTrace(); 
+			}
+		                                                                                              
 		/*	if(mdp!=null){
 				char buffer[] = new char[1];
 				String message="";
@@ -40,10 +54,7 @@ public class ClientThread implements Runnable{
 			thread = new Thread(this);
 			thread.start();
 
-		}
-		catch (IOException e){ }
-
-
+		}catch (IOException e){ }
 	}
 
 	public void run(){
@@ -55,6 +66,7 @@ public class ClientThread implements Runnable{
 				if((t=in.read(buf, 0, 250))!=-1){
 					message=new String(buf).substring(0,t);
 					if(!message.substring(0,t).equals("/quit"))
+
 						salon.sendAll("<"+numClient+"> "+message, numClient);
 				}
 			}while(!message.substring(t).equals("/quit"));

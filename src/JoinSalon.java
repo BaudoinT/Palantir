@@ -29,19 +29,29 @@ public class JoinSalon extends Thread{
 		sc = new Socket (serv, 1111);
 		InputStream in = sc.getInputStream();
 		out=sc.getOutputStream();
+		String message="";
+
+		//RECEPTION CLE PUBLIC
+		byte buff[]=new byte[250];
+		if((in.read(buff, 0, 250))!=-1){
+			message=new String(buff);
+			System.out.println(message);
+		}
 
 		//if(mdp!=null)
 		//	out.println(mdp);
-		String message="";
+
 		this.start();
+
+		//RECPTION DES MESSAGES DU SERVEUR
 		while(true){
 			message="";
 			byte buf[]=new byte[250];
-				if((in.read(buf, 0, 250))!=-1){
-					message=new String(buf);
-					System.out.println(message);
+			if((in.read(buf, 0, 250))!=-1){
+				message=new String(buf);
+				System.out.println(message);
 
-				}
+			}
 		}
 	}
 
