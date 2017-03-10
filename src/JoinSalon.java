@@ -7,16 +7,22 @@ public class JoinSalon extends Thread{
 	OutputStream out;
 	Socket sc=null;
 	private String serv, salon, mdp;
-	
+	private ChiffrementAes chiff;
+	private String cle;
+
 	public JoinSalon(String serv, String salon, String mdp) throws UnknownHostException, IOException{
 		this.serv=serv;
 		this.salon=salon;
 		this.mdp=mdp;
+
+		chiff = new ChiffrementAes();
+		chiff.generationcle();
+		cle = chiff.getCle();
+
 	}
 
 	public JoinSalon(String serv, String salon) throws UnknownHostException, IOException {
-		this.serv=serv;
-		this.salon=salon;
+		this(serv,salon,null);	
 	}
 	
 	public void connect() throws UnknownHostException, IOException{

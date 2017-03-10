@@ -10,6 +10,8 @@ public class CreateSalon {
 	private FileWriter fw;
 	private File dir;
 
+	private PublicKey pub;
+
 	public CreateSalon(String nom){
 		this.nom=nom;
 	}
@@ -21,13 +23,17 @@ public class CreateSalon {
 
 
 	public void initialisation() throws IOException {
-		dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom+"/history");
+		dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom);
 		dir.mkdirs();
-		fw = new FileWriter (dir);
+		//fw = new FileWriter (dir);
 		InetSocketAddress serverAddr = new InetSocketAddress("localhost", 1111);
 		ServerSocket ss = new ServerSocket(1111);
-	/*	InetSocketAddress serverAddr2 = new InetSocketAddress("localhost", 1112);
-		ServerSocket ss2 = new ServerSocket(1112);*/
+
+
+		GenerateurCleRsa gene = new GenerateurClesRsa();
+		gene.generator();
+
+		
 
 		while (true){
 			try {
@@ -40,11 +46,11 @@ public class CreateSalon {
 	}
 
 	synchronized public void sendAll(String message, int num){
-		try{
+	/*	try{
 			fw.write(message);
 		}catch(Exception e){
 			System.out.println(e);
-		}
+		}*/
 		System.out.println(message);
 		PrintWriter out;
 		for (int i=0; i < clients.size(); i++){

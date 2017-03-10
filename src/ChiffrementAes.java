@@ -5,16 +5,13 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class ChiffrementAes {
 
-	prrivate String cle="";
+	private String cle="";
 	private byte[] mess_clair;
 	private byte[] mess_chiff;
 	private byte[] mess_dechiff;
 	private SecretKeySpec specification = null;
 	
 	
-	public ChiffrementAes(byte[] mess){
-		mess_clair = mess;
-	}
 	
 	public void generationcle(){
 		char car = 'a';
@@ -24,7 +21,13 @@ public class ChiffrementAes {
 			cle+= (char) (c+x);
 		}
 	}
-	
+	public void setMessage(byte []s){
+		mess_clair = s;
+	}
+
+	public void setCle(String s){
+		cle = s;
+	}
 	public String getCle() {
 		return cle;
 	}

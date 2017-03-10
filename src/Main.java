@@ -24,12 +24,13 @@ public class Main {
 		
 		}else if(args[0].equals("-j") || args[0].equals("--join")){
 			JoinSalon join;
+			
+			try {
 			if(args.length>3 && args[3].equals("-p"))
 				join= new JoinSalon(args[1],args[2], args[4]);
 			else
 				join= new JoinSalon(args[1], args[2]);
 			
-			try {
 				join.connect();
 			} catch (Exception e) {
 				System.out.println("Erreur lors de la connection au serveur");
