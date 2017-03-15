@@ -1,4 +1,3 @@
-package chiff_rsa;
 
 public class TestMain {
 
