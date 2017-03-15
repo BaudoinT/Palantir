@@ -11,6 +11,7 @@ public class ClientThread implements Runnable{
 	private CreateSalon salon;
 	private int numClient=0;
 	private boolean receveur;
+	private String cleSymetique;
 
 	public ClientThread (Socket s, CreateSalon salon, String mdp, boolean b){
 		receveur=b;
@@ -21,7 +22,7 @@ public class ClientThread implements Runnable{
 			in = sc.getInputStream();
 
 			//ENVOI CLE PUBLIC
-			/*File source = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon.getNom()+"/cle_pub");
+			File source = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon.getNom()+"/cle_pub");
 			InputStream sourceFile = new FileInputStream(source);  
 			                                                                                                
 			try {
@@ -32,7 +33,18 @@ public class ClientThread implements Runnable{
 				} 
 			} catch (IOException e){ 
 				e.printStackTrace(); 
-			}*/
+			}
+			
+			//RECEPTION CLE SYMETRIQUE CHIFFRE
+			byte buffCleSymetique[]=new byte[256];
+			if((in.read(buffCleSymetique, 0, 256))!=-1){
+				DechiffrementRsa dechif = new DechiffrementRsa("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon.getNom()+"/cle_priv",buffCleSymetique);
+				dechif.dechiffrement();
+				cleSymetique=new String(dechif.getMessDeChiffree());
+			}
+			
+			
+			
 		                                                                                              
 		/*	if(mdp!=null){
 				char buffer[] = new char[1];
@@ -60,19 +72,34 @@ public class ClientThread implements Runnable{
 	public void run(){
 		String message = "";
 		int t=0;
+		ChiffrementAes dechiffMessage = new ChiffrementAes();
 		try{
-			byte buf[]=new byte[250];
-			if((t=in.read(buf, 0, 250))!=-1)
-				salon.setPseudo(new String(buf));
-
-			do{
-				if((t=in.read(buf, 0, 250))!=-1){
-					message=new String(buf).substring(0,t);
-					if(!message.substring(0,t).equals("/quit"))
-
-						salon.sendAll(message, numClient, true);
+			//RECEPTION PSEUDO
+			byte tmp[]=new byte[256];
+			if((t=in.read(tmp, 0, 256))!=-1){
+				byte buf[]=new byte[t];
+				for (int i = 0; i < t; i++)
+					buf[i]=tmp[i];
+				dechiffMessage.setCle(cleSymetique);
+				dechiffMessage.setMessageChiffre(buf);
+				if(dechiffMessage.dechiffrement()){
+					salon.setPseudo(new String(dechiffMessage.getMess_dechiff()));
 				}
-			}while(!message.substring(t).equals("/quit"));
+			}
+			//RECEPTION MESSAGE
+			do{
+				if((t=in.read(tmp, 0, 256))!=-1){
+					byte buf[]=new byte[t];
+					for (int i = 0; i < t; i++)
+						buf[i]=tmp[i];
+					dechiffMessage.setMessageChiffre(buf);
+					if(dechiffMessage.dechiffrement()){
+						message=new String(dechiffMessage.getMess_dechiff());
+					//	if(!message.substring(0,t).equals("/quit"))
+							salon.sendAll(message, numClient, true);
+					}
+				}
+			}while(!message.equals("/quit"));
 		}catch (Exception e){
 		}
 		finally{
@@ -83,5 +110,9 @@ public class ClientThread implements Runnable{
 			}
 			catch (IOException e){ }
 		}
+	}
+	
+	public String getCleSymetrique(){
+		return cleSymetique;
 	}
 }

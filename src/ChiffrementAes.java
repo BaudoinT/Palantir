@@ -29,6 +29,10 @@ public class ChiffrementAes {
 	public String getCle() {
 		return cle;
 	}
+	
+	public void setMessageChiffre(byte[] t){
+		mess_chiff = t;
+	}
 
 	public byte[] getMess_clair() {
 		return mess_clair;
@@ -59,6 +63,7 @@ public class ChiffrementAes {
 	public boolean dechiffrement(){
 
 		try {
+			specification = new SecretKeySpec(cle.getBytes(), "AES");
 		    Cipher dechiffreur = Cipher.getInstance("AES");
 		    dechiffreur.init(Cipher.DECRYPT_MODE, specification);
 		    mess_dechiff = dechiffreur.doFinal(mess_chiff);
@@ -69,11 +74,12 @@ public class ChiffrementAes {
 		return true;
 	}
 	
-/*	
+
 	public static void main(String [] args){
 		
 		String message = "Hello world !!";
-		ChiffrementAes chiff = new ChiffrementAes(message.getBytes());
+		ChiffrementAes chiff = new ChiffrementAes();
+		chiff.setMessage(message.getBytes());
 		chiff.generationcle();
 		String cle = chiff.getCle();
 		
@@ -82,12 +88,14 @@ public class ChiffrementAes {
 		
 		chiff.chiffrement();
 		byte[] mess_chiff= chiff.getMess_chiff();
-		
+		ChiffrementAes chiff2 = new ChiffrementAes();
+		chiff2.setMessageChiffre(mess_chiff);
+		chiff2.setCle(cle);
 		System.out.println("Le message chiffre est : "+new String(mess_chiff));
-		chiff.dechiffrement();
-		byte[] mess_dechiff = chiff.getMess_dechiff();
+		chiff2.dechiffrement();
+		byte[] mess_dechiff = chiff2.getMess_dechiff();
 		System.out.println("Le message dechiffre est : "+new String(mess_dechiff));
 	}
-*/
+
 }
 

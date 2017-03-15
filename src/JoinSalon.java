@@ -10,6 +10,7 @@ public class JoinSalon extends Thread{
 	ChiffrementAes chiff;
 	private String cle;
 	private String pseudo;
+	ChiffrementAes chiffAes;
 
 	public JoinSalon(String serv, String salon, String mdp, String pseudo) throws UnknownHostException, IOException{
 		this.serv=serv;
@@ -19,6 +20,7 @@ public class JoinSalon extends Thread{
 		chiff = new ChiffrementAes();
 		chiff.generationcle();
 		cle = chiff.getCle();
+		
 
 	}
 
@@ -31,13 +33,28 @@ public class JoinSalon extends Thread{
 		InputStream in = sc.getInputStream();
 		out=sc.getOutputStream();
 		String message="";
-
+		String cle_symetrique;
+		
+		File dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo);
+		dir.mkdirs();
+		File cle_pub = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo+"/cle_pub");
+		OutputStream destinationFile = new FileOutputStream(cle_pub); 
+		
 		//RECEPTION CLE PUBLIC
-	/*	byte buff[]=new byte[250];
-		if((in.read(buff, 0, 250))!=-1){
-			message=new String(buff);
-			System.out.println(message);
-		}*/
+		int nbr;
+		byte buff[]=new byte[1000];
+		if((nbr = in.read(buff, 0, 1000))!=-1){
+			destinationFile.write(buff, 0, nbr);
+		}
+		//CREATION CLE SYMETRIQUE
+		chiffAes = new ChiffrementAes();
+		chiffAes.generationcle();
+		cle_symetrique = chiffAes.getCle();
+		
+		//Envoi CLE SYMETRIQUE CHIFFRE
+		ChiffrementRsa chif = new ChiffrementRsa("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo+"/cle_pub",cle_symetrique.getBytes());
+		chif.chiffrement();
+		out.write(chif.getMessChiffre());
 
 		//if(mdp!=null)
 		//	out.println(mdp);
@@ -59,11 +76,20 @@ public class JoinSalon extends Thread{
 	public void run(){
 		try{
 			//ENVOI PSEUDO
-			out.write(pseudo.getBytes());
+			byte buf[]=pseudo.getBytes();
+			chiffAes.setMessage(buf);
+			if(chiffAes.chiffrement()){
+				out.write(chiffAes.getMess_chiff());
+			}
+			
+			//ENVOI MESSAGE
 			Scanner scan= new Scanner(System.in);
 			String message="";
 			while(!(message=scan.nextLine()).equals("/quit")){
-				out.write(message.getBytes());
+				chiffAes.setMessage(message.getBytes());
+				if(chiffAes.chiffrement()){
+					out.write(chiffAes.getMess_chiff());
+				}
 				message="";
 			}
 			out.write(message.getBytes());
