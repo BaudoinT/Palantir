@@ -8,6 +8,7 @@ public class JoinSalon extends Thread{
 	private Socket sc=null;
 	private String serv, salon, cle, pseudo;
 	private ChiffrementAes chiff, chiffAes;
+	private boolean deco=false;
 
 	public JoinSalon(String serv, String salon, String pseudo) throws UnknownHostException, IOException{
 		this.serv=serv;
@@ -19,50 +20,54 @@ public class JoinSalon extends Thread{
 	}
 	
 	public void connect() throws UnknownHostException, IOException{
-		sc = new Socket (serv, 1111);
-		InputStream in = sc.getInputStream();
-		out=sc.getOutputStream();
-		String message="";
-		String cle_symetrique;
-		
-		File dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo);
-		dir.mkdirs();
-		File cle_pub = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo+"/cle_pub");
-		OutputStream destinationFile = new FileOutputStream(cle_pub); 
-		
-		//RECEPTION CLE PUBLIC
-		int nbr;
-		byte buff[]=new byte[1000];
-		if((nbr = in.read(buff, 0, 1000))!=-1){
-			destinationFile.write(buff, 0, nbr);
-		}
-		//CREATION CLE SYMETRIQUE
-		chiffAes = new ChiffrementAes();
-		chiffAes.generationcle();
-		cle_symetrique = chiffAes.getCle();
-		
-		//ENVOI CLE SYMETRIQUE CHIFFRE
-		ChiffrementRsa chif = new ChiffrementRsa("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo+"/cle_pub",cle_symetrique.getBytes());
-		chif.chiffrement();
-		out.write(chif.getMessChiffre());
+		if(!deco){
+			sc = new Socket (serv, 1111);
+			InputStream in = sc.getInputStream();
+			out=sc.getOutputStream();
+			String message="";
+			String cle_symetrique;
+			
+			File dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo);
+			dir.mkdirs();
+			File cle_pub = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo+"/cle_pub");
+			OutputStream destinationFile = new FileOutputStream(cle_pub); 
+			
+			//RECEPTION CLE PUBLIC
+			int nbr;
+			byte buff[]=new byte[1000];
+			if((nbr = in.read(buff, 0, 1000))!=-1){
+				destinationFile.write(buff, 0, nbr);
+			}
+			//CREATION CLE SYMETRIQUE
+			chiffAes = new ChiffrementAes();
+			chiffAes.generationcle();
+			cle_symetrique = chiffAes.getCle();
+			
+			//ENVOI CLE SYMETRIQUE CHIFFRE
+			ChiffrementRsa chif = new ChiffrementRsa("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo+"/cle_pub",cle_symetrique.getBytes());
+			chif.chiffrement();
+			out.write(chif.getMessChiffre());
 
-		this.start();
+			this.start();
 
-		//RECPTION DES MESSAGES DU SERVEUR
-		while(true){
-			message="";
-			int t=0;
-			byte tmp[]=new byte[256];
-			if((t=in.read(tmp, 0, 256))!=-1){
-				byte buf[]=new byte[t];
-				for (int i = 0; i < t; i++)
-					buf[i]=tmp[i];
-				chiffAes.setMessageChiffre(buf);
-				if(chiffAes.dechiffrement()){
-					message=new String(chiffAes.getMess_dechiff());
-					System.out.println(message);
+			//RECPTION DES MESSAGES DU SERVEUR
+			while(true){
+				message="";
+				int t=0;
+				byte tmp[]=new byte[256];
+				if((t=in.read(tmp, 0, 256))!=-1){
+					byte buf[]=new byte[t];
+					for (int i = 0; i < t; i++)
+						buf[i]=tmp[i];
+					chiffAes.setMessageChiffre(buf);
+					if(chiffAes.dechiffrement()){
+						message=new String(chiffAes.getMess_dechiff());
+						System.out.println(message);
+					}
 				}
 			}
+		}else{
+			System.exit(0);
 		}
 	}
 
@@ -89,16 +94,32 @@ public class JoinSalon extends Thread{
 			if(chiffAes.chiffrement()){
 				out.write(chiffAes.getMess_chiff());
 			}
-			sc.close();
+			
+				sc.close();
 		}catch(Exception e){
 			System.out.println(e);
 		}finally{
 			try{
+				deco=true;
+				//this.delRepertory(new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo));
 				System.exit(0);
 			}catch(Exception e){
 				System.out.println(e);
 			}
 
 		}
+	}
+
+	public static boolean delRepertory(File dir) {
+		if (dir.isDirectory()) {
+			String[] children = dir.list();
+			for (int i = 0; i < children.length; i++){
+				boolean success = delRepertory(new File(dir, children[i]));
+				if (!success) 
+					return false;	
+			}
+		}
+		//System.out.println(dir.delete());
+		return true;
 	}
 }
