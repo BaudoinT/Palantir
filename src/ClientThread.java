@@ -10,13 +10,11 @@ public class ClientThread implements Runnable{
 	private InputStream in;
 	private CreateSalon salon;
 	private int numClient=0;
-	private boolean receveur;
 	private String cleSymetique;
 	private String pseudo;
 	ChiffrementAes dechiffMessage = new ChiffrementAes();
 
 	public ClientThread (Socket s, CreateSalon salon, boolean b){
-		receveur=b;
 		this.salon=salon;
 		sc=s;
 		try{
@@ -24,13 +22,14 @@ public class ClientThread implements Runnable{
 			in = sc.getInputStream();
 
 			//ENVOI CLE PUBLIC
-			File source = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon.getNom()+"/cle_pub");
+		//	File source = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon.getNom()+"/cle_pub");
+			File source = new File("/home/thibault/.palantir/"+salon.getNom()+"/cle_pub");
+			
 			InputStream sourceFile = new FileInputStream(source);  
 			                                                                                                
 			try {
-				byte buffer[] = new byte[(int)source.length()+1]; 
-				int nbLecture;
-				while ((nbLecture = sourceFile.read(buffer)) != -1){ 
+				byte buffer[] = new byte[(int)source.length()+1];
+				while (sourceFile.read(buffer) != -1){ 
 					out.write(buffer); 
 				} 
 			} catch (IOException e){ 
@@ -40,7 +39,9 @@ public class ClientThread implements Runnable{
 			//RECEPTION CLE SYMETRIQUE CHIFFRE
 			byte buffCleSymetique[]=new byte[256];
 			if((in.read(buffCleSymetique, 0, 256))!=-1){
-				DechiffrementRsa dechif = new DechiffrementRsa("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon.getNom()+"/cle_priv",buffCleSymetique);
+//				DechiffrementRsa dechif = new DechiffrementRsa("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon.getNom()+"/cle_priv",buffCleSymetique);
+				DechiffrementRsa dechif = new DechiffrementRsa("/home/thibault/.palantir/"+salon.getNom()+"/cle_priv",buffCleSymetique);
+
 				dechif.dechiffrement();
 				cleSymetique=new String(dechif.getMessDeChiffree());
 			}

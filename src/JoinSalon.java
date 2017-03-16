@@ -6,7 +6,7 @@ public class JoinSalon extends Thread{
 	
 	private OutputStream out;
 	private Socket sc=null;
-	private String serv, salon, cle, pseudo;
+	private String serv, salon, pseudo;
 	private ChiffrementAes chiff, chiffAes;
 	private boolean deco=false;
 
@@ -16,7 +16,6 @@ public class JoinSalon extends Thread{
 		this.pseudo=pseudo;
 		chiff = new ChiffrementAes();
 		chiff.generationcle();
-		cle = chiff.getCle();
 	}
 	
 	public void connect() throws UnknownHostException, IOException{
@@ -27,9 +26,11 @@ public class JoinSalon extends Thread{
 			String message="";
 			String cle_symetrique;
 			
-			File dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo);
+			//File dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo);
+			File dir = new File ("/home/thibault/.palantir/"+salon+"/"+pseudo);
 			dir.mkdirs();
-			File cle_pub = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo+"/cle_pub");
+			//File cle_pub = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo+"/cle_pub");
+			File cle_pub = new File("/home/thibaut/.palantir/"+salon+"/"+pseudo+"/cle_pub");
 			OutputStream destinationFile = new FileOutputStream(cle_pub); 
 			
 			//RECEPTION CLE PUBLIC
@@ -44,7 +45,8 @@ public class JoinSalon extends Thread{
 			cle_symetrique = chiffAes.getCle();
 			
 			//ENVOI CLE SYMETRIQUE CHIFFRE
-			ChiffrementRsa chif = new ChiffrementRsa("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo+"/cle_pub",cle_symetrique.getBytes());
+			//ChiffrementRsa chif = new ChiffrementRsa("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo+"/cle_pub",cle_symetrique.getBytes());
+			ChiffrementRsa chif = new ChiffrementRsa("/home/thibault/.palantir/"+salon+"/"+pseudo+"/cle_pub",cle_symetrique.getBytes());
 			chif.chiffrement();
 			out.write(chif.getMessChiffre());
 
@@ -101,25 +103,11 @@ public class JoinSalon extends Thread{
 		}finally{
 			try{
 				deco=true;
-				//this.delRepertory(new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo));
 				System.exit(0);
 			}catch(Exception e){
 				System.out.println(e);
 			}
 
 		}
-	}
-
-	public static boolean delRepertory(File dir) {
-		if (dir.isDirectory()) {
-			String[] children = dir.list();
-			for (int i = 0; i < children.length; i++){
-				boolean success = delRepertory(new File(dir, children[i]));
-				if (!success) 
-					return false;	
-			}
-		}
-		//System.out.println(dir.delete());
-		return true;
 	}
 }
