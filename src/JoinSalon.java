@@ -4,28 +4,18 @@ import java.util.Scanner;
 
 public class JoinSalon extends Thread{
 	
-	OutputStream out;
-	Socket sc=null;
-	private String serv, salon, mdp;
-	ChiffrementAes chiff;
-	private String cle;
-	private String pseudo;
-	ChiffrementAes chiffAes;
+	private OutputStream out;
+	private Socket sc=null;
+	private String serv, salon, cle, pseudo;
+	private ChiffrementAes chiff, chiffAes;
 
-	public JoinSalon(String serv, String salon, String mdp, String pseudo) throws UnknownHostException, IOException{
+	public JoinSalon(String serv, String salon, String pseudo) throws UnknownHostException, IOException{
 		this.serv=serv;
 		this.salon=salon;
-		this.mdp=mdp;
 		this.pseudo=pseudo;
 		chiff = new ChiffrementAes();
 		chiff.generationcle();
 		cle = chiff.getCle();
-		
-
-	}
-
-	public JoinSalon(String serv, String salon, String pseudo) throws UnknownHostException, IOException {
-		this(serv,salon,null, pseudo);	
 	}
 	
 	public void connect() throws UnknownHostException, IOException{
@@ -51,24 +41,27 @@ public class JoinSalon extends Thread{
 		chiffAes.generationcle();
 		cle_symetrique = chiffAes.getCle();
 		
-		//Envoi CLE SYMETRIQUE CHIFFRE
+		//ENVOI CLE SYMETRIQUE CHIFFRE
 		ChiffrementRsa chif = new ChiffrementRsa("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo+"/cle_pub",cle_symetrique.getBytes());
 		chif.chiffrement();
 		out.write(chif.getMessChiffre());
-
-		//if(mdp!=null)
-		//	out.println(mdp);
 
 		this.start();
 
 		//RECPTION DES MESSAGES DU SERVEUR
 		while(true){
 			message="";
-			byte buf[]=new byte[250];
-			if((in.read(buf, 0, 250))!=-1){
-				message=new String(buf);
-				System.out.println(message);
-
+			int t=0;
+			byte tmp[]=new byte[256];
+			if((t=in.read(tmp, 0, 256))!=-1){
+				byte buf[]=new byte[t];
+				for (int i = 0; i < t; i++)
+					buf[i]=tmp[i];
+				chiffAes.setMessageChiffre(buf);
+				if(chiffAes.dechiffrement()){
+					message=new String(chiffAes.getMess_dechiff());
+					System.out.println(message);
+				}
 			}
 		}
 	}
@@ -92,7 +85,10 @@ public class JoinSalon extends Thread{
 				}
 				message="";
 			}
-			out.write(message.getBytes());
+			chiffAes.setMessage(message.getBytes());
+			if(chiffAes.chiffrement()){
+				out.write(chiffAes.getMess_chiff());
+			}
 			sc.close();
 		}catch(Exception e){
 			System.out.println(e);

@@ -4,40 +4,34 @@ import java.util.*;
 
 public class CreateSalon {
 	private String nom;
-	private String mdp;
-	private Vector clients = new Vector();
-	private int nbClients=0;
-	private FileWriter fw;
 	private File dir;
-	private ArrayList<String> listePseudo=new ArrayList<>();
+	private ArrayList<ClientThread> listeClients=new ArrayList<>();
+	ChiffrementAes chiffAes= new ChiffrementAes();
 
 	public CreateSalon(String nom){
 		this.nom=nom;
 	}
 
-	public CreateSalon(String nom, String mdp){
-		this.mdp=mdp;
-		this.nom=nom;
-	}
-
 	public void initialisation() throws IOException {
+		//CREATION DU DOSSIER DU SALON
 		dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom);
 		dir.mkdirs();
-		//fw = new FileWriter (dir);
+
+		//CREATION DE LA SOCKET SERVEUR
 		InetSocketAddress serverAddr = new InetSocketAddress("localhost", 1111);
 		ServerSocket ss = new ServerSocket(1111);
 
-
+		//GENERATION ET SAUVEGARDE DE LA PAIRE DE CLE
 		GenerateurCleRsa gene = new GenerateurCleRsa();
 		GestionClesRsa ges = new GestionClesRsa();
 		gene.generator();
-
 		ges.sauvegardeClePublic(gene.getPublicKey(),"/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom+"/cle_pub");
 		ges.sauvegardeClePrivee(gene.getPrivateKey(),"/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom+"/cle_priv");
 
+		//LECTURE DES NOUVEAUX UTILISATEURS
 		while (true){
 			try {
-				new ClientThread(ss.accept(),this, mdp, true);
+				new ClientThread(ss.accept(),this, true);
 			}catch(Exception e){
 				e.printStackTrace();
 			}
@@ -46,20 +40,19 @@ public class CreateSalon {
 	}
 
 	synchronized public void sendAll(String message, int num, boolean b){
-	/*	try{
-			fw.write(message);
-		}catch(Exception e){
-			System.out.println(e);
-		}*/
+		
 		if(b)
-			message=("<"+listePseudo.get(num)+"> "+message);
+			message=("<"+listeClients.get(num).getPseudo()+"> "+message);
 		System.out.println(message);
 		OutputStream out;
-		for (int i=0; i < clients.size(); i++){
-			out = (OutputStream) clients.elementAt(i);
+		for (int i=0; i < listeClients.size(); i++){
+			out = listeClients.get(i).getOut();
 			if (out != null && i != num){
 				try{
-					out.write(message.getBytes());
+					chiffAes.setCle(listeClients.get(i).getCleSymetrique());
+					chiffAes.setMessage(message.getBytes());
+					if(chiffAes.chiffrement())
+						out.write(chiffAes.getMess_chiff());
 					out.flush();
 				}catch(Exception e){
 					System.out.println(e);
@@ -68,35 +61,40 @@ public class CreateSalon {
 		}
 	}
 
-	synchronized public void delClient(int i){
-		nbClients--;
-		if(clients.elementAt(i) != null){
-			clients.removeElementAt(i);
-			listePseudo.remove(i);
+	synchronized public void sendList(int num){
+		OutputStream out=listeClients.get(num).getOut();
+		String message="[";
+		for(ClientThread c : listeClients)
+			message+=""+c.getPseudo()+", ";
+		message=message.substring(0,message.length()-2);
+		message+="]";
+		try{
+			chiffAes.setCle(listeClients.get(num).getCleSymetrique());
+			chiffAes.setMessage(message.getBytes());
+			if(chiffAes.chiffrement())
+				out.write(chiffAes.getMess_chiff());
+			out.flush();
+		}catch(Exception e){
+			System.out.println(e);
 		}
 	}
 
-	synchronized public int addClient(OutputStream out){
-		nbClients++;
-		clients.addElement(out);
-		sendAll("Un nouveau client est dans la conversation", nbClients-1, false);
-		return clients.size()-1;
+	synchronized public void delClient(int i){
+		listeClients.remove(i);
+	}
+
+	synchronized public int addClient(ClientThread c){
+		listeClients.add(c);
+		sendAll("'"+listeClients.get(listeClients.size()-1).getPseudo()+"' a rejoint la conversation", listeClients.size()-1, false);
+		return listeClients.size()-1;
 	}
 
 	synchronized public int getNbClients(){
-		return nbClients;
+		return listeClients.size()-1;
 	}
 
 	public String getNom(){
 		return nom;
-	}
-
-	public void setPseudo(String pseudo){
-		listePseudo.add(pseudo);
-	}
-
-	public String getPseudo(int n){
-		return listePseudo.get(n);
 	}
 
 }
