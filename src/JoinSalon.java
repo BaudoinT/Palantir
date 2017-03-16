@@ -26,11 +26,9 @@ public class JoinSalon extends Thread{
 			String message="";
 			String cle_symetrique;
 			
-			//File dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo);
-			File dir = new File ("/home/thibault/.palantir/"+salon+"/"+pseudo);
+			File dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo);
 			dir.mkdirs();
-			//File cle_pub = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo+"/cle_pub");
-			File cle_pub = new File("/home/thibaut/.palantir/"+salon+"/"+pseudo+"/cle_pub");
+			File cle_pub = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo+"/cle_pub");
 			OutputStream destinationFile = new FileOutputStream(cle_pub); 
 			
 			//RECEPTION CLE PUBLIC
@@ -45,8 +43,7 @@ public class JoinSalon extends Thread{
 			cle_symetrique = chiffAes.getCle();
 			
 			//ENVOI CLE SYMETRIQUE CHIFFRE
-			//ChiffrementRsa chif = new ChiffrementRsa("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo+"/cle_pub",cle_symetrique.getBytes());
-			ChiffrementRsa chif = new ChiffrementRsa("/home/thibault/.palantir/"+salon+"/"+pseudo+"/cle_pub",cle_symetrique.getBytes());
+			ChiffrementRsa chif = new ChiffrementRsa("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo+"/cle_pub",cle_symetrique.getBytes());
 			chif.chiffrement();
 			out.write(chif.getMessChiffre());
 

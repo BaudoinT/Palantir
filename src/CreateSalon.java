@@ -14,8 +14,7 @@ public class CreateSalon {
 
 	public void initialisation() throws IOException {
 		//CREATION DU DOSSIER DU SALON
-		//dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom);
-		dir = new File ("/home/thibault/.palantir/"+nom);
+		dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom);
 		dir.mkdirs();
 
 		//CREATION DE LA SOCKET SERVEUR
@@ -26,11 +25,8 @@ public class CreateSalon {
 		GenerateurCleRsa gene = new GenerateurCleRsa();
 		GestionClesRsa ges = new GestionClesRsa();
 		gene.generator();
-		//ges.sauvegardeClePublic(gene.getPublicKey(),"/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom+"/cle_pub");
-		//ges.sauvegardeClePrivee(gene.getPrivateKey(),"/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom+"/cle_priv");
-
-		ges.sauvegardeClePublic(gene.getPublicKey(),"/home/thibault/.palantir/"+nom+"/cle_pub");
-		ges.sauvegardeClePrivee(gene.getPrivateKey(),"/home/thibault/.palantir/"+nom+"/cle_priv");
+		ges.sauvegardeClePublic(gene.getPublicKey(),"/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom+"/cle_pub");
+		ges.sauvegardeClePrivee(gene.getPrivateKey(),"/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+nom+"/cle_priv");
 
 		//LECTURE DES NOUVEAUX UTILISATEURS
 		while (true){

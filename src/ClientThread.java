@@ -22,8 +22,7 @@ public class ClientThread implements Runnable{
 			in = sc.getInputStream();
 
 			//ENVOI CLE PUBLIC
-		//	File source = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon.getNom()+"/cle_pub");
-			File source = new File("/home/thibault/.palantir/"+salon.getNom()+"/cle_pub");
+			File source = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon.getNom()+"/cle_pub");
 			
 			InputStream sourceFile = new FileInputStream(source);  
 			                                                                                                
@@ -39,9 +38,8 @@ public class ClientThread implements Runnable{
 			//RECEPTION CLE SYMETRIQUE CHIFFRE
 			byte buffCleSymetique[]=new byte[256];
 			if((in.read(buffCleSymetique, 0, 256))!=-1){
-//				DechiffrementRsa dechif = new DechiffrementRsa("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon.getNom()+"/cle_priv",buffCleSymetique);
-				DechiffrementRsa dechif = new DechiffrementRsa("/home/thibault/.palantir/"+salon.getNom()+"/cle_priv",buffCleSymetique);
-
+				DechiffrementRsa dechif = new DechiffrementRsa("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon.getNom()+"/cle_priv",buffCleSymetique);
+			
 				dechif.dechiffrement();
 				cleSymetique=new String(dechif.getMessDeChiffree());
 			}
