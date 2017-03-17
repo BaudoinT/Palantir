@@ -7,25 +7,26 @@ public class JoinSalon extends Thread{
 	private OutputStream out;
 	private Socket sc=null;
 	private String serv, salon, pseudo;
-	private ChiffrementAes chiff, chiffAes;
+	private ChiffrementAes chiffAes;
 	private boolean deco=false;
 
 	public JoinSalon(String serv, String salon, String pseudo) throws UnknownHostException, IOException{
 		this.serv=serv;
 		this.salon=salon;
 		this.pseudo=pseudo;
-		chiff = new ChiffrementAes();
-		chiff.generationcle();
 	}
 	
 	public void connect() throws UnknownHostException, IOException{
 		if(!deco){
+			//Creation de la socket client
 			sc = new Socket (serv, 1111);
+			//Creation des pipes de communication avec le serveur
 			InputStream in = sc.getInputStream();
 			out=sc.getOutputStream();
 			String message="";
 			String cle_symetrique;
 			
+			//Creation d'un dossier client contenant la cle public du serveur
 			File dir = new File ("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo);
 			dir.mkdirs();
 			File cle_pub = new File("/home/infoetu/"+System.getProperty("user.name")+"/.palantir/"+salon+"/"+pseudo+"/cle_pub");
@@ -58,6 +59,7 @@ public class JoinSalon extends Thread{
 					byte buf[]=new byte[t];
 					for (int i = 0; i < t; i++)
 						buf[i]=tmp[i];
+					//dechiffrement des messages
 					chiffAes.setMessageChiffre(buf);
 					if(chiffAes.dechiffrement()){
 						message=new String(chiffAes.getMess_dechiff());
@@ -83,6 +85,7 @@ public class JoinSalon extends Thread{
 			Scanner scan= new Scanner(System.in);
 			String message="";
 			while(!(message=scan.nextLine()).equals("/quit")){
+				//chiffrement du message
 				chiffAes.setMessage(message.getBytes());
 				if(chiffAes.chiffrement()){
 					out.write(chiffAes.getMess_chiff());

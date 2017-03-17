@@ -75,27 +75,6 @@ public class ChiffrementAes {
 	}
 	
 
-	public static void main(String [] args){
-		
-		String message = "Hello world !!";
-		ChiffrementAes chiff = new ChiffrementAes();
-		chiff.setMessage(message.getBytes());
-		chiff.generationcle();
-		String cle = chiff.getCle();
-		
-		System.out.println("Le message clair est : "+message);
-		System.out.println("La cle est :"+cle );
-		
-		chiff.chiffrement();
-		byte[] mess_chiff= chiff.getMess_chiff();
-		ChiffrementAes chiff2 = new ChiffrementAes();
-		chiff2.setMessageChiffre(mess_chiff);
-		chiff2.setCle(cle);
-		System.out.println("Le message chiffre est : "+new String(mess_chiff));
-		chiff2.dechiffrement();
-		byte[] mess_dechiff = chiff2.getMess_dechiff();
-		System.out.println("Le message dechiffre est : "+new String(mess_dechiff));
-	}
 
 }
 
